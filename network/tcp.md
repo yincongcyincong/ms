@@ -1,8 +1,15 @@
 # tcp协议：
 
-#### 拥塞避免：
+#### tcp包头：
   ![image](https://github.com/yincongcyincong/ms/blob/main/image/tcp_header.png)
+URG：表示紧急指针是否有效；   
+ACK：表示确认号是否有效，携带ACK标志的数据报文段为确认报文段；    
+PSH：提示接收端的应用程序应该立即从TCP接受缓冲区中读走数据，为接受后续数据腾出空间；   
+RST：表示要求对方重新建立连接，携带RST标志位的TCP报文段成为复位报文段；    
+SYN：表示请求建立一个连接，携带SYN标志的TCP报文段为同步报文段；    
+FIN：通知对方本端要关闭了，带FIN标志的TCP报文段为结束报文段。
 
+#### 拥塞避免：
 为了防止cwnd增加过快而导致网络拥塞，所以需要设置一个慢开始门限ssthresh状态变量（我也不知道这个到底是什么，就认为他是一个拥塞控制的标识）,它的用法：
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/load_avoid.png)
  1. 当cwnd < ssthresh,使用慢启动算法。   
