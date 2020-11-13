@@ -1,11 +1,13 @@
 # tcp协议：
 
 #### 拥塞避免：
-  为了防止cwnd增加过快而导致网络拥塞，所以需要设置一个慢开始门限ssthresh状态变量（我也不知道这个到底是什么，就认为他是一个拥塞控制的标识）,它的用法：
-  ![image](https://github.com/yincongcyincong/ms/blob/main/image/load_avoid.png)
-   1. 当cwnd < ssthresh,使用慢启动算法。   
-   2. 当cwnd > ssthresh,使用拥塞控制算法，停用慢启动算法。   
-   3. 当cwnd = ssthresh，这两个算法都可以。   
+  ![image](https://github.com/yincongcyincong/ms/blob/main/image/tcp_header.png)
+
+为了防止cwnd增加过快而导致网络拥塞，所以需要设置一个慢开始门限ssthresh状态变量（我也不知道这个到底是什么，就认为他是一个拥塞控制的标识）,它的用法：
+![image](https://github.com/yincongcyincong/ms/blob/main/image/load_avoid.png)
+ 1. 当cwnd < ssthresh,使用慢启动算法。   
+ 2. 当cwnd > ssthresh,使用拥塞控制算法，停用慢启动算法。   
+ 3. 当cwnd = ssthresh，这两个算法都可以。   
 
 #### 快重传：
   ![image](https://github.com/yincongcyincong/ms/blob/main/image/quick_send.png)
