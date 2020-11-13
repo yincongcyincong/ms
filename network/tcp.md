@@ -2,19 +2,23 @@
 
 #### 拥塞避免：
   为了防止cwnd增加过快而导致网络拥塞，所以需要设置一个慢开始门限ssthresh状态变量（我也不知道这个到底是什么，就认为他是一个拥塞控制的标识）,它的用法：
-  1. 当cwnd < ssthresh,使用慢启动算法，
-  2. 当cwnd > ssthresh,使用拥塞控制算法，停用慢启动算法。
-  3. 当cwnd = ssthresh，这两个算法都可以。
+  ![image](https://github.com/yincongcyincong/ms/blob/main/image/load_avoid.png)
+   1. 当cwnd < ssthresh,使用慢启动算法。   
+   2. 当cwnd > ssthresh,使用拥塞控制算法，停用慢启动算法。   
+   3. 当cwnd = ssthresh，这两个算法都可以。   
 
 #### 快重传：
+  ![image](https://github.com/yincongcyincong/ms/blob/main/image/quick_send.png)
   快重传算法要求首先接收方收到一个失序的报文段后就立刻发出重复确认，而不要等待自己发送数据时才进行捎带确认。接收方成功的接受了发送方发送来的M1、M2并且分别给发送了ACK，现在接收方没有收到M3，而接收到了M4，显然接收方不能确认M4，因为M4是失序的报文段。如果根据可靠性传输原理接收方什么都不做，但是按照快速重传算法，在收到M4、M5等报文段的时候，不断重复的向发送方发送M2的ACK,如果接收方一连收到三个重复的ACK,那么发送方不必等待重传计时器到期，由于发送方尽早重传未被确认的报文段。
 
 
 #### 快恢复：
+![image](https://github.com/yincongcyincong/ms/blob/main/image/quick_recover.png)
   1. 当发送发连续接收到三个确认时，就执行乘法减小算法，把慢启动开始门限（ssthresh）减半，但是接下来并不执行慢开始算法。
   2. 此时不执行慢启动算法，而是把cwnd设置为ssthresh的一半， 然后执行拥塞避免算法，使拥塞窗口缓慢增大。
 
-
+![image](https://github.com/yincongcyincong/ms/blob/main/image/three_hello.png)
+![image](https://github.com/yincongcyincong/ms/blob/main/image/four_goodbye.png)
 #### 【问题1】为什么连接的时候是三次握手，关闭的时候却是四次握手？
 答：因为当Server端收到Client端的SYN连接请求报文后，可以直接发送SYN+ACK报文。其中ACK报文是用来应答的，SYN报文是用来同步的。但是关闭连接时，当Server端收到FIN报文时，很可能并不会立即关闭SOCKET，所以只能先回复一个ACK报文，告诉Client端，"你发的FIN报文我收到了"。只有等到我Server端所有的报文都发送完了，我才能发送FIN报文，因此不能一起发送。故需要四步握手。
 
