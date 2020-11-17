@@ -7,16 +7,16 @@
 - [https协议](network/https.md)
 - [quic协议](network/quic.md)
 #### 数据库
-- [mysql](question/q002.md)
-- [redis](question/q002.md)
-- [vm](question/q002.md)
+- [mysql](db/mysql.md)
+- [redis](db/redis.md)
+- [vm](db/vm.md)
 
 #### golang基础
-- [MPG过程](question/q002.md)
-- [golang的map](question/q002.md)
-- [golang的slice](question/q002.md)
-- [golang的channel](question/q002.md)
+- [MPG过程](golang/q002.md)
+- [golang的map](golang/q002.md)
+- [golang的slice](golang/q002.md)
+- [golang的channel](golang/q002.md)
 
 #### 设计
-- [秒杀设计](question/q002.md)
-- [消息队列设计](question/q002.md)
+- [秒杀设计](design/q002.md)
+- [消息队列设计](design/q002.md)
