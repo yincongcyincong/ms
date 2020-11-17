@@ -100,6 +100,14 @@ RTREE在MySQL很少使用，仅支持geometry数据类型，支持该类型的�
 record lock：记录锁，也就是仅仅锁着单独的一行    
 gap lock：区间锁，仅仅锁住一个区间(注意这里的区间都是开区间，也就是不包括边界值。   
 next-key lock：record lock+gap lock，所以next-key lock也就半开半闭区间，且是下界开，上界闭。左开右闭[8,9),如果有唯一索引，就是record lock    
+共享锁【S锁】   
+又称读锁，若事务T对数据对象A加上S锁，则事务T可以读A但不能修改A，其他事务只能再对A加S锁，而不能加X锁，直到T释放A上的S锁。    
+这保证了其他事务可以读A，但在T释放A上的S锁之前不能对A做任何修改。   
+ 
+排他锁【X锁】   
+又称写锁。若事务T对数据对象A加上X锁，事务T可以读A也可以修改A，其他事务不能再对A加任何锁，直到T释放A上的锁。    
+这保证了其他事务在T释放A上的锁之前不能再读取和修改A。    
+
 
 #### innodb引擎的4大特性
 插入缓冲（insert buffer）,二次写(double write),自适应哈希索引(ahi),预读(read ahead)
@@ -115,5 +123,22 @@ next-key lock：record lock+gap lock，所以next-key lock也就半开半闭区�
 8.	在索引字段上使用函数。   
 9.	当全表扫描速度比索引速度快时，mysql会使用全表扫描，此时索引失效。   
 
+#### where和having都可以使用的场景
+1）select addtime,name from dw_users where addtime> 1500000000   
+2）select addtime,name from dw_users having addtime> 1500000000    
+解释：上面的having可以用的前提是我已经筛选出了addtime字段，在这种情况下和where的效果是等效的，但是如果我没有select addtime就会报错！！因为having是从前面筛选的字段再筛选，而where是从数据表中的字段直接进行的筛选的。    
+2. 只可以用where，不可以用having的情况    
+1） select addtime,name from dw_users where addtime> 1500000000    
+2） select phone,name from dw_users having addtime> 1500000000 //报错！！！因为前面并没有筛选出addtime字段    
+3. 只可以用having，不可以用where情况   
+查询每种category_id商品的价格平均值，获取平均价格大于100元的商品信息   
+1）select category_id , avg(price) as ag from dw_goods group by goods_category having ag > 100   
+2）select category_id , avg(price) as ag from dw_goods where ag>100 group by goods_category //报错！！因为from dw_goods 这张数据表里面没有ag这个字段    
+注意:where 后面要跟的是数据表里的字段，如果我把ag换成avg(price)也是错误的！因为表里没有该字段。而having只是根据前面查询出来的是什么就可以后面接什么。   
 
+#### mysql的复制原理大致如下
+(1)首先，mysql主库在事务提交时会把数据库变更作为事件Events记录在二进制文件binlog中；mysql主库上的sys_binlog控制binlog日志刷新到磁盘。   
+(2)主库推送二进制文件binlog中的事件到从库的中继日志relay log,之后从库根据中继日志重做数据库变更操作。通过逻辑复制，以此来达到数据一致。   
+Mysql通过3个线程来完成主从库之间的数据复制：其中BinLog Dump线程跑在主库上，I/O线程和SQl线程跑在从库上。当从库启动复制（start slave）时，首先创建I/O线程连接主库，主库随后创建Binlog Dump线程读取数据库事件并发给I/O线程，I/O线程获取到数据库事件更新到从库的中继日志Realy log中去，之后从库上的SQl线程读取中继日志relay log 中更新的数据库事件并应用。   
 
+Innodb的mvcc多版本并发控制用undolog控制，比如说你读取了一条数据，其他的事物再改，你读取的数据不变，甚至不是事务的修改，你读取的不会再变    
