@@ -4,7 +4,7 @@
 
 innodb_flush_log_at_trx_commit    
 如果innodb_flush_log_at_trx_commit设置为0：log buffer将每秒一次地写入log file中，并且log file的flush(刷到磁盘)操作同时进行.该模式下，在事务提交的时候，不会主动触发写入磁盘的操作;    
-如果innodb_flush_log_at_trx_commit设置为1：每次事务提交时MySQL都会把log buffer的数据写入log file，并且flush(刷到磁盘)中去;    
+如果innodb_flush_log_at_trx_commit设置为1：每次事务提交时MySQL都会把log buffer的数据写入log file(redo log)，并且flush(刷到磁盘)中去;    
 如果innodb_flush_log_at_trx_commit设置为2：每次事务提交时MySQL都会把log buffer的数据写入log file，但是flush(刷到磁盘)操作并不会同时进行。该模式下,MySQL会每秒执行一次 flush(刷到磁盘)操作。   
 
 注意：由于进程调度策略问题,这个"每秒执行一次 flush(刷到磁盘)操作"并不是保证100%的"每秒"。   
@@ -154,3 +154,7 @@ Innodb的mvcc多版本并发控制用undolog控制，比如说你读取了一条
 5、range:只检索给定范围的行，使用一个索引来选择行。key列显示使用了哪个索引，一般就是where语句中出现了between,in等范围的查询。这种范围扫描索引扫描比全表扫描要好，因为它开始于索引的某一个点，而结束另一个点，不用全表扫描   
 6、index:index 与all区别为index类型只遍历索引树。通常比all快，因为索引文件比数据文件小很多。    
 7、all：遍历全表以找到匹配的行   
+
+#### undo log
+Undo Log(回滚日志)用来实现事务的原子性(回滚)和隔离性(MVCC)。
+Undo Log和Redo Log正好相反，记录的是数据被修改前的信息，并且只记录逻辑变化，基于Undo Log进行的回滚只是对数据库进行一个相反的操作，而不是直接恢复物理页。
