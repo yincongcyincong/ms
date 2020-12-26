@@ -155,17 +155,16 @@ G2从缓存队列中取出数据，channel会将等待队列中的G1推出，将
 假如是先进行执行recv操作的G2会怎么样？
 你可能会顺着以上的思路反推。首先：
 
-
-
-这个时候G2会主动调用Go的调度器,让G2等待，并从让出M，让其他G去使用。 G2还会被抽象成含有G2指针和recv空元素的sudog结构体保存到hchan的recvq中等待被唤醒       
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/channel18.png)  
 
+这个时候G2会主动调用Go的调度器,让G2等待，并从让出M，让其他G去使用。 G2还会被抽象成含有G2指针和recv空元素的sudog结构体保存到hchan的recvq中等待被唤醒               
 
-此时恰好有个goroutine G1开始向channel中推送数据 ch <- 1。 此时，非常有意思的事情发生了：    
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel19.gif) 
 
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel19.gif)  
+此时恰好有个goroutine G1开始向channel中推送数据 ch <- 1。 此时，非常有意思的事情发生了：          
 
-G1并没有锁住channel，然后将数据放到缓存中，而是直接把数据从G1直接copy到了G2的栈中。 这种方式非常的赞！在唤醒过程中，G2无需再获得channel的锁，然后从缓存中取数据。减少了内存的copy，提高了效率。
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/channel20.gif)  
-之后的事情显而易见：
+
+G1并没有锁住channel，然后将数据放到缓存中，而是直接把数据从G1直接copy到了G2的栈中。 这种方式非常的赞！在唤醒过程中，G2无需再获得channel的锁，然后从缓存中取数据。减少了内存的copy，提高了效率。     
+之后的事情显而易见：      
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/channel21.gif)  
