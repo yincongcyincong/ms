@@ -90,7 +90,7 @@ ch <- 1
 ```
 <-ch
 ```
-图为：
+图为：     
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/channel7.gif)   
 注意以上两幅图中buf和recvx以及sendx的变化，recvx和sendx是根据循环链表buf的变动而改变的。     
 至于为什么channel会使用循环链表作为缓存结构，我个人认为是在缓存列表在动态的send和recv过程中，定位当前send或者recvx的位置、选择send的和recvx的位置比较方便吧，
@@ -141,15 +141,15 @@ ch <- 1
 
 那么，G1什么时候被唤醒呢？这个时候G2隆重登场。   
 
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel14.png)     
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel15.png)     
 
 
 G2执行了recv操作p := <-ch，于是会发生以下的操作：        
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel15.png)  
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel16.gif)  
 
 
 G2从缓存队列中取出数据，channel会将等待队列中的G1推出，将G1当时send的数据推到缓存中，然后调用Go的scheduler，唤醒G1，并把G1放到可运行的Goroutine队列中。
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel16.gif)  
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel17.gif)  
 
 
 假如是先进行执行recv操作的G2会怎么样？
@@ -158,13 +158,14 @@ G2从缓存队列中取出数据，channel会将等待队列中的G1推出，将
 
 
 这个时候G2会主动调用Go的调度器,让G2等待，并从让出M，让其他G去使用。 G2还会被抽象成含有G2指针和recv空元素的sudog结构体保存到hchan的recvq中等待被唤醒       
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel17.gif)  
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel18.png)  
 
 
 此时恰好有个goroutine G1开始向channel中推送数据 ch <- 1。 此时，非常有意思的事情发生了：    
 
-![image](https://github.com/yincongcyincong/ms/blob/main/image/channel18.png)  
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel19.gif)  
 
 G1并没有锁住channel，然后将数据放到缓存中，而是直接把数据从G1直接copy到了G2的栈中。 这种方式非常的赞！在唤醒过程中，G2无需再获得channel的锁，然后从缓存中取数据。减少了内存的copy，提高了效率。
-
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel20.gif)  
 之后的事情显而易见：
+![image](https://github.com/yincongcyincong/ms/blob/main/image/channel21.gif)  
