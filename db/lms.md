@@ -35,17 +35,19 @@ MemTable是在内存中的数据结构，用于保存最近更新的数据，会
 
 不过在介绍这两种策略之前，先介绍三个比较重要的概念，事实上不同的策略就是围绕这三个概念之间做出权衡和取舍。
 
-1）读放大:读取数据时实际读取的数据量大于真正的数据量。例如在LSM树中需要先在MemTable查看当前key是否存在，不存在继续从SSTable中寻找（读同样的数据需要几次io）。
-2）写放大:写入数据时实际写入的数据量大于真正的数据量。例如在LSM树中写入时可能触发Compact操作，导致实际写入的数据量远大于该key的数据量（同样一条数据在compaction的时候会被写入多少次）。
-3）空间放大:数据实际占用的磁盘空间比数据的真正大小更多。上面提到的冗余存储，对于一个key来说，只有最新的那条记录是有效的，而之前的记录都是可以被清理回收的（tag一样的数据会占用一样的空间）。
-1) size-tiered 策略
+1）读放大:读取数据时实际读取的数据量大于真正的数据量。例如在LSM树中需要先在MemTable查看当前key是否存在，不存在继续从SSTable中寻找（读同样的数据需要几次io）。   
+2）写放大:写入数据时实际写入的数据量大于真正的数据量。例如在LSM树中写入时可能触发Compact操作，导致实际写入的数据量远大于该key的数据量（同样一条数据在compaction的时候会被写入多少次）。    
+3）空间放大:数据实际占用的磁盘空间比数据的真正大小更多。上面提到的冗余存储，对于一个key来说，只有最新的那条记录是有效的，而之前的记录都是可以被清理回收的（tag一样的数据会占用一样的空间）。    
+
+
+#### 1) size-tiered 策略
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/lms3.jpg)
 
 size-tiered策略保证每层SSTable的大小相近，同时限制每一层SSTable的数量。如上图，每层限制SSTable为N，当每层SSTable达到N后，则触发Compact操作合并这些SSTable，并将合并后的结果写入到下一层成为一个更大的sstable。
 
 由此可以看出，当层数达到一定数量时，最底层的单个SSTable的大小会变得非常大。并且size-tiered策略会导致空间放大比较严重。即使对于同一层的SSTable，每个key的记录是可能存在多份的，只有当该层的SSTable执行compact操作才会消除这些key的冗余记录。
 
-2) leveled策略
+#### 2) leveled策略
 ![image](https://github.com/yincongcyincong/ms/blob/main/image/lms4.jpg)
 
 每一层的总大小固定，从上到下逐渐变大
