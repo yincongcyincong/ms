@@ -4,7 +4,7 @@ HTTP 是基于 TCP/IP 协议的应用层协议。它不涉及数据包（packet�
 最早版本是1991年发布的0.9版。该版本极其简单，只有一个命令GET。    
 
 ```
-### GET /index.html
+GET /index.html
 ```
 上面命令表示，TCP 连接（connection）建立后，客户端向服务器请求（request）网页index.html。    
 
@@ -18,7 +18,7 @@ HTTP 是基于 TCP/IP 协议的应用层协议。它不涉及数据包（packet�
 服务器发送完毕，就关闭TCP连接。
 
 ### 二、HTTP/1.0
-2.1 简介    
+### 2.1 简介    
 1996年5月，HTTP/1.0 版本发布，内容大大增加。   
 
 首先，任何格式的内容都可以发送。这使得互联网不仅可以传输文字，还能传输图像、视频、二进制文件。这为互联网的大发展奠定了基础。    
@@ -29,7 +29,7 @@ HTTP 是基于 TCP/IP 协议的应用层协议。它不涉及数据包（packet�
 
 其他的新增功能还包括状态码（status code）、多字符集支持、多部分发送（multi-part type）、权限（authorization）、缓存（cache）、内容编码（content encoding）等。   
 
-2.2 请求格式
+### 2.2 请求格式
 下面是一个1.0版的HTTP请求的例子。
 
 ```
