@@ -7,8 +7,10 @@
 •	12位的计数序列号，序列号即一系列的自增id，可以支持同一节点同一毫秒生成多个ID序号，12位的计数序列号支持每个节点每毫秒产生4096个ID序号。 
 
 #### 对一个文件的单词进行计数
-awk -F '[,:]'  '{a[$4]++}  END{for(i in a)print i "-->"  a[i]}' 20190524.csv 
-awk -F ' '  '{a[$6]++}  END{for(i in a)print i "-->"  a[i]}' ./1.txt
+```
+awk -F '[,:]'  '{a[$4]++}  END{for(i in a)print i "-->"  a[i]}' 20190524.csv    
+awk -F ' '  '{a[$6]++}  END{for(i in a)print i "-->"  a[i]}' ./1.txt 
+```
 
 top –H看线程
 
