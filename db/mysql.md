@@ -162,4 +162,23 @@ Undo Log和Redo Log正好相反，记录的是数据被修改前的信息，并�
 #### innodb中select * from xxx = 123 for update 锁的实现， xxx有没有索引
 rc是先锁所有行，然后释放掉不符合的行锁    
 rr先锁所有行，不释放   
-innodb的锁都是next key lock，回滚句不同情况退化成行锁或者gap lock    
+innodb的锁都是next key lock，不同情况退化成行锁或者gap lock    
+
+#### Read View
+Read View就是事务进行快照读操作的时候生产的读视图(Read View)，在该事务执行的快照读的那一刻，会生成数据库系统当前的一个快照，记录并维护系统当前活跃事务的ID(当每个事务开启时，都会被分配一个ID, 这个ID是递增的，所以最新的事务，ID值越大)
+
+我们可以把Read View简单的理解成有三个全局属性
+
+trx_list
+一个数值列表，用来维护Read View生成时刻系统正活跃的事务ID
+up_limit_id
+记录trx_list列表中事务ID最小的ID
+low_limit_id
+ReadView生成时刻系统尚未分配的下一个事务ID，也就是目前已出现过的事务ID的最大值+1
+
+首先比较DB_TRX_ID < up_limit_id, 如果小于，则当前事务能看到DB_TRX_ID 所在的记录，如果大于等于进入下一个判断
+接下来判断 DB_TRX_ID 大于等于 low_limit_id , 如果大于等于则代表DB_TRX_ID 所在的记录在Read View生成后才出现的，那对当前事务肯定不可见，如果小于则进入下一个判断
+判断DB_TRX_ID 是否在活跃事务之中，trx_list.contains(DB_TRX_ID)，如果在，则代表我Read View生成时刻，你这个事务还在活跃，还没有Commit，你修改的数据，我当前事务也是看不见的；如果不在，则说明，你这个事务在Read View生成之前就已经Commit了，你修改的结果，我当前事务是能看见的
+
+在RC隔离级别下，是每个快照读都会生成并获取最新的Read View；
+在RR隔离级别下，则是同一个事务中的第一个快照读才会创建Read View, 之后的快照读获取的都是同一个Read View
