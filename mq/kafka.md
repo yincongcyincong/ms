@@ -75,3 +75,11 @@ unclean.leader.election.enable=true
 
 
 #### kafka但分区有序
+
+#### kafka迁移
+会通过retention参数进行复制数据
+
+min.isr配置会导致发送失败
+
+策略1，可靠性有保证，但是可用性低，只有最后挂了leader活过来kafka才能恢复。   
+策略1，可靠性有保证，但是可用性低，只有最后挂了leader活过来kafka才能恢复。   
