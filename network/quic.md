@@ -4,7 +4,7 @@
   ![image](https://github.com/yincongcyincong/ms/blob/main/image/tls-hand.png)'
   
  大致理解，quic第一次握手，server给client发送公钥A，发送完成之后，client自己生成另一个公钥B，用服务端的公钥A加密公钥B发送到服务端，   
- 公钥A和客户端的私钥B可以生成一个对称加密钥匙，私钥A解密client发送的数据，私钥A和公钥B也能生成对称加密的钥匙    
+ 公钥A和客户端的私钥B可以生成一个对称加密钥匙，私钥A解密client发送的数据，公钥A和公钥B也能生成对称加密的钥匙    
  然后开始通信
 
 第二、连接保活。TCP 使用 WIFI 切换 4G，或者是 4G 切换 WIFI 会导致连接中断，影响连接保活率。而 QUIC 协议支持连接迁移，网络切换无需重连，所以当 IP 发生变化，仍然可以保持长连接，不需要中断。    
