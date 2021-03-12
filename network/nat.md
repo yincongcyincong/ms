@@ -1,16 +1,30 @@
-用语定义
+#### Full-cone NAT（also known as one-to-one NAT）
+一旦一个内网地址 (iAddr:iPort) 被映射到一个外部地址 (eAddr:ePort), 来自 iAddr:iPort 的任何数据包将通过 eAddr:ePort 发送。
 
-内部Tuple：指内部主机的私有地址和端口号所构成的二元组，即内部主机所发送报文的源地址、端口所构成的二元组                
-外部Tuple：指内部Tuple经过NAT的源地址/端口转换之后，所获得的外部地址、端口所构成的二元组，即外部主机收到经NAT转换之后的报文时，它所看到的该报文的源地址（通常是NAT设备的地址）和源端口                   
-目标Tuple：指外部主机的地址、端口所构成的二元组，即内部主机所发送报文的目标地址、端口所构成的二元组                  
-详细释义                
+任何外部主机能够通过eAddr:ePort这个地址发送数据包到iAddr:iPort.
 
-Full Cone NAT：“全锥形NAT”，所有来自同一 个内部Tuple X的请求均被NAT转换至同一个外部Tuple Y，而不管这些请求是不是属于同一个应用或者是多个应用的。除此之外，当X-Y的转换关系建立之后，任意外部主机均可随时将Y中的地址和端口作为目标地址 和目标端口，向内部主机发送UDP报文，由于对外部请求的来源无任何限制，因此这种方式虽然足够简单，但却不那么安全                    
+#### Address-restricted-cone NAT
+一旦一个内网地址 (iAddr:iPort) 被映射到一个外部地址 (eAddr:ePort), 来自 iAddr:iPort 的任何数据包将通过 eAddr:ePort 发送.
 
-Restricted Cone NAT： “限制锥形NAT”，它是Full Cone的受限版本：所有来自同一个内部Tuple X的请求均被NAT转换至同一个外部Tuple Y，这与Full Cone相同，但不同的是，只有当内部主机曾经发送过报文给外部主机（假设其IP地址为Z）后，外部主机才能以Y中的信息作为目标地址和目标端口，向内部 主机发送UDP请求报文，这意味着，NAT设备只向内转发（目标地址/端口转换）那些来自于当前已知的外部主机的UDP报文，从而保障了外部请求来源的安 全性                 
+仅只有接收到主机(iAddr:iPort)通过eAddr:ePort发送的数据包的外部主机通过该主机的任何端口发送到eAddr:ePort的数据包才能够被正确的转发到iAddr:iPort.也就是说主机有关端口无关.
 
-Port Restricted Cone NAT：“端口限制锥形NAT”，它是Restricted Cone NAT的进一步受限版。只有当内部主机曾经发送过报文给外部主机（假设其IP地址为Z且端口为P）之后，外部主机才能以Y中的信息作为目标地址和目标端 口，向内部主机发送UDP报文，同时，其请求报文的源端口必须为P，这一要求进一步强化了对外部报文请求来源的限制，从而较Restrictd Cone更具安全性                
+#### Port-restricted cone NAT
+类似于address restricted cone NAT, 但是端口号有限制.
 
-Symmetric NAT：“对称型NAT”，这是一种比所有Cone NAT都要更为灵活的转换方式：在Cone NAT中，内部主机的内部Tuple与外部Tuple的转换映射关系是独立于内部主机所发出的UDP报文中的目标地址及端口的，即与目标Tuple无关； 在Symmetric NAT中，目标Tuple则成为了NAT设备建立转换关系的一个重要考量：只有来自于同一个内部Tuple 、且针对同一目标Tuple的请求才被NAT转换至同一个外部Tuple，否则的话，NAT将为之分配一个新的外部Tuple；打个比方，当内部主机以相 同的内部Tuple对2个不同的目标Tuple发送UDP报文时，此时NAT将会为内部主机分配两个不同的外部Tuple，并且建立起两个不同的内、外部 Tuple转换关系。与此同时，只有接收到了内部主机所发送的数据包的外部主机才能向内部主机返回UDP报文，这里对外部返回报文来源的限制是与Port Restricted Cone一致的。不难看出，如果说Full Cone是要求最宽松NAT UDP转换方式，那么，Symmetric NAT则是要求最严格的NAT方式，其不仅体现在转换关系的建立上，而且还体现在对外部报文来源的限制方面。            
-                    
+一旦一个内网地址 (iAddr:iPort) 被映射到一个外部地址 (eAddr:ePort), 来自 iAddr:iPort 的任何数据包将通过 eAddr:ePort 发送.
 
+仅只有接收到主机(iAddr:iPort)通过eAddr:ePort发送的数据包的外部主机通过该主机的相同端口发送到eAddr:ePort的数据包才能够被正确的转发到iAddr:iPort.
+
+#### Symmetric NAT
+来自相同内部ip和port发送到相同目的地ip和port的请求被映射到唯一的外部ip和port地址；如果相同的内部主机采用相同的ip和port地址发送到不同的目的地，那么重新分配映射地址。
+
+只有先前收到内部主机发送的包的外部主机才能够发送返回包到内部主机。
+
+针对前面三种NAT类型（即cone NAT）只要通信双方彼此知道对方的内部地址和外部地址的映射关系，然后通过UDP打洞的方式就可以建立相互连接的通信；但是第四种也就是Symmetric NAT的话由于每次向不同目的地发送数据包时采用不同的外部地址，也就没办法通过直接的方式建立P2P连接。
+
+|   | 全锥型 | ip限制锥型 | 端口限制锥型  |  对称型 |   
+|  ----  | ----  | ----  | ----  | ----  |
+| 全锥型 | 可以 |  可以 |  可以 | 可以 |
+| ip限制锥型 | 可以 |  可以 |  可以 | 可以 |
+| 端口限制锥型  | 可以 |  可以 |  可以 | 不可以 |
+| 对称型  | 可以 |  可以 |  不可以 | 不可以 |
