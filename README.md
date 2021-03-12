@@ -32,5 +32,5 @@
 - [杂七杂八](other/design.md)
 
 #### mq
-- [rabbitmq](mq/rabbitmq.md)
+- [rabbitmq](mq/rabbimq.md)
 - [kafka](mq/kafka.md)
