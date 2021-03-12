@@ -29,7 +29,7 @@
 - [杂七杂八](other/other.md)
 
 #### 设计
-- [杂七杂八](other/design.md)
+- [设计](other/design.md)
 
 #### mq
 - [rabbitmq](mq/rabbimq.md)
