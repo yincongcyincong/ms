@@ -140,7 +140,7 @@ var service micro.Service
 func main() {
 
 	registrys := etcdv3.NewRegistry(
-		registry.Addrs("192.168.3.86:2379", "192.168.3.87:2379"),
+		registry.Addrs("192.168.1.1:2379", "192.168.1.1:2379"),
 		registry.Timeout(10*time.Second),
 	)
 
