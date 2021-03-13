@@ -110,7 +110,7 @@ func (tb *Bucket) take(now time.Time, count int64, maxWait time.Duration) (time.
 ```
 #### jaeger介绍
 
-#### 对追踪监控的例子
+#### opencensus是google服务追踪和监控的框架
 ```
 package main
 
