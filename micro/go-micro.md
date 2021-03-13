@@ -108,5 +108,155 @@ func (tb *Bucket) take(now time.Time, count int64, maxWait time.Duration) (time.
 	return waitTime, true
 }
 ```
+#### jaeger介绍
 
+#### 对追踪监控的例子
+```
+package main
 
+import (
+	"context"
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/zipkin"
+	"fmt"
+	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/registry"
+	"github.com/micro/go-plugins/registry/etcdv3"
+	"github.com/micro/go-plugins/wrapper/trace/opencensus"
+	openzipkin "github.com/openzipkin/zipkin-go"
+	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
+	"log"
+	"net/http"
+	"proto"
+	"time"
+)
+
+var service micro.Service
+
+func main() {
+
+	registrys := etcdv3.NewRegistry(
+		registry.Addrs("192.168.3.86:2379", "192.168.3.87:2379"),
+		registry.Timeout(10*time.Second),
+	)
+
+	client.DefaultClient = client.NewClient(
+		client.Registry(registrys),
+		client.Wrap(opencensus.NewClientWrapper()),
+	)
+
+	service = micro.NewService(
+		micro.RegisterTTL(5*time.Second),
+		micro.RegisterInterval(4*time.Second),
+		//micro.Client(client.DefaultClient),
+		micro.Registry(registrys),
+		micro.Name("greeter1"),
+		micro.WrapHandler(opencensus.NewHandlerWrapper()),
+		//micro.WrapClient(opencensus.NewClientWrapper()),
+	)
+
+	micro.RegisterHandler(service.Server(), new(HelloHandeler))
+
+	service.Init()
+
+	initZipkin()
+	initJaeger()
+
+	go prometheusTest()
+
+	if err := service.Run(); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func initZipkin() {
+	localEndpoint, err := openzipkin.NewEndpoint("go.micro.srv.greeter", "")
+	if err != nil {
+		log.Fatalf("Failed to create the local zipkinEndpoint: %v", err)
+	}
+	reporter := zipkinHTTP.NewReporter("http://192.168.3.106:9411/api/v2/spans", zipkinHTTP.BatchInterval(1*time.Second))
+	ze := zipkin.NewExporter(reporter, localEndpoint)
+	trace.RegisterExporter(ze)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(0.9)})
+
+}
+
+func initJaeger() {
+	exporter, err := jaeger.NewExporter(jaeger.Options{
+		CollectorEndpoint: "http://192.168.3.168:14268/api/traces",
+		Process: jaeger.Process{
+			ServiceName: "trace-demo",
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+}
+
+func prometheusTest() {
+
+	exporter, err := prometheus.NewExporter(prometheus.Options{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	view.RegisterExporter(exporter)
+
+	// Create view to see the number of processed videos cumulatively.
+	// Create view to see the amount of video processed
+	// Subscribe will allow view data to be exported.
+	// Once no longer needed, you can unsubscribe from the view.
+	if err = view.Register(append(opencensus.DefaultServerViews, opencensus.DefaultClientViews...)...); err != nil {
+		log.Fatalf("Cannot register the view: %v", err)
+	}
+
+	// Set reporting period to report data at every second.
+	view.SetReportingPeriod(1 * time.Second)
+
+	addr := ":9000"
+	log.Printf("Serving at %s", addr)
+	http.Handle("/metrics", exporter)
+	log.Fatal(http.ListenAndServe(addr, nil))
+}
+
+type HelloHandeler struct{}
+
+func (p *HelloHandeler) Hello(ctx context.Context, req *proto.String, rsp *proto.String) error {
+
+	// Register to all RPC client views.
+	//if err := view.Register(opencensus.DefaultClientViews...); err != nil {
+	//	log.Fatal(err)
+	//}
+
+	return call(ctx)
+}
+
+func (p *HelloHandeler) Test(ctx context.Context, req *proto.String, rsp *proto.String) error {
+	time.Sleep(100 * time.Millisecond)
+	return nil
+}
+
+func call(ctx context.Context) error {
+	var method string
+	//if i%2 == 0 {
+	//	method = "HelloHandeler.Hello"
+	//} else {
+	method = "HelloHandeler.Test"
+	//}
+
+	response := new(proto.String)
+	request := client.NewRequest("greeter2", method, &proto.String{})
+	err := client.Call(ctx, request, response)
+
+	fmt.Println("response", response)
+	fmt.Println("err", err)
+	return err
+
+}
+
+```
