@@ -109,3 +109,22 @@ redis主从同步，开始是全量复制，后面是增量，最新的增量数
 解决：
 将整存整取的大对象，分拆为多个小对象。可以尝试将对象分拆成几个key-value， 使用multiGet获取值，这样分拆的意义在于分拆单次操作的压力，将操作压力平摊到多个redis实例中，降低对单个redis的IO影响；
 
+#### redis压缩链表
+```
+<zlbytes>，该字段固定是一个四字节的无符号整数，用于表示整个压缩链表所占用内存的长度（以字节为单位），这个长度数值是包含这个<zlbytes>本身的。
+<ztail>，该字段固定是一个四字节的无符号整数，用于表示在链表中最后一个节点的偏移字节量，借助这个字段，我们不需要遍历整个链表便可以在链表尾部执行Pop操作。
+<zllen>，该字段固定是一个两个字节的无符号整数，用于表示链表中节点的个数。但是该字段最多只能表示2^16-2个节点个数；超过这个数量，也就是该字段被设置为2^16-1时， 意味着我们需要遍历整个链表，才可以获取链表中节点真实的数量。
+<entry>，该字段表示链表中的一个节点，同一个链表中的节点，其长度大概率是不同的，因此需要特殊的方式来获取节点的长度，具体的内容会在下一个部分详细介绍。
+<zlend>，该字段可以被认为是一个特殊的<entry>节点，用作压缩链表的结束标记，只有一个字节，存储着0xFF，一旦我们遍历到这个特殊的标记，便意味着我们完成了对这个压缩链表的遍历。
+```
+```
+typedef struct zlentry {
+    unsigned int prevrawlensize;    //记录<prevlen>字段本身的字节长度
+    unsigned int prevrawlen;        //记录保存在<prevlen>字段中前序节点的长度
+    unsigned int lensize;           //记录<encoding>字段本身所占用的字节长度
+    unsigned int len;               //记录当前entry中data数据所占用的长度，可以为0，表示存储在<encoding>中的小整数
+    unsigned int headersize;        //记录当前entry中header的长度，等于prevrawlensize + lensize
+    unsigned char encoding;         //记录当前entry中数据的编码方式
+    unsigned char *p;               //保存指向当前entry起始位置的指针，而这个指针指向的是当前节点的<prevlen>字段
+} zlentry;
+```
