@@ -5,5 +5,5 @@
 UNLINK 异步删除
 
 #### context深度还是广度（dfs）
-深度
+广度优先
 
