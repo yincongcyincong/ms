@@ -186,12 +186,12 @@ Read View就是事务进行快照读操作的时候生产的读视图(Read View)
 
 我们可以把Read View简单的理解成有三个全局属性
 
-trx_list
-一个数值列表，用来维护Read View生成时刻系统正活跃的事务ID
-up_limit_id
-记录trx_list列表中事务ID最小的ID
-low_limit_id
-ReadView生成时刻系统尚未分配的下一个事务ID，也就是目前已出现过的事务ID的最大值+1
+trx_list    
+一个数值列表，用来维护Read View生成时刻系统正活跃的事务ID    
+up_limit_id   
+记录trx_list列表中事务ID最小的ID    
+low_limit_id    
+ReadView生成时刻系统尚未分配的下一个事务ID，也就是目前已出现过的事务ID的最大值+1   
 
 首先比较DB_TRX_ID < up_limit_id, 如果小于，则当前事务能看到DB_TRX_ID 所在的记录，如果大于等于进入下一个判断
 接下来判断 DB_TRX_ID 大于等于 low_limit_id , 如果大于等于则代表DB_TRX_ID 所在的记录在Read View生成后才出现的，那对当前事务肯定不可见，如果小于则进入下一个判断
