@@ -110,7 +110,7 @@ RTREE在MySQL很少使用，仅支持geometry数据类型，支持该类型的�
 
 #### innodb锁类型：（for update）
 record lock：记录锁，也就是仅仅锁着单独的一行    
-gap lock：区间锁，仅仅锁住一个区间(注意这里的区间都是开区间，也就是不包括边界值。   
+gap lock：区间锁，仅仅锁住一个区间,锁定一个范围，但不包括记录本身(注意这里的区间都是开区间，也就是不包括边界值)。   
 next-key lock：record lock+gap lock，所以next-key lock也就半开半闭区间，且是下界开，上界闭。左开右闭[8,9),如果有唯一索引，就是record lock    
 
 InnoDB行锁是通过给聚簇索引上的索引项加锁来实现的，InnoDB这种行锁实现特点意味着：只有通过索引条件检索数据，InnoDB才使用行级锁，否则，InnoDB将使用表锁！   
