@@ -21,3 +21,6 @@
 
 
 #### redis集群模式主挂了怎选从
+通过投票机制来判断master是否不可用，参与投票的是所有的master，所有的master之间维持着心跳，如果一半以上的master确定某个master失联，则集群认为该master挂掉，此时发生主从切换。    
+
+通过选举机制来确定哪一个从节点升级为master。选举的依据依次是：网络连接正常->5秒内回复过INFO命令->10*down-after-milliseconds内与主连接过的->从服务器优先级->复制偏移量->运行id较小的。选出之后通过slaveif no ont将该从服务器升为新master。   
