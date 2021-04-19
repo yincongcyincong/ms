@@ -145,6 +145,3 @@ struct sdshdr {
 
 };
 ```
-
-#### redis 大keyh饿
-#### redis 大key
