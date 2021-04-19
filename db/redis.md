@@ -128,3 +128,23 @@ typedef struct zlentry {
     unsigned char *p;               //保存指向当前entry起始位置的指针，而这个指针指向的是当前节点的<prevlen>字段
 } zlentry;
 ```
+压缩链表主要用在hash键和列表键
+#### 字符串
+```
+struct sdshdr {
+
+    // 记录 buf 数组中已使用字节的数量
+    // 等于 SDS 所保存字符串的长度
+    int len;
+
+    // 记录 buf 数组中未使用字节的数量
+    int free;
+
+    // 字节数组，用于保存字符串
+    char buf[];
+
+};
+```
+
+#### redis 大keyh饿
+#### redis 大key
