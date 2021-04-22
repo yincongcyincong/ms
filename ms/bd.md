@@ -12,9 +12,15 @@
 从一个内核态的fd1传到内核态的fd2
 
 #### 设置锁的超时时间超过了设置时间
-client1获取锁成功，同时获取一个Token 33   
-client1进入GC Pause，锁超时释放   
-client2获取锁成功，同时获取Token 34   
-client2访问公共资源，并将Token 34 写到资源上    
-client1从GC Pause恢复，访问公共资源，发现所携带的Token小于正在访问公共资源的Token，则访问失败，直接返回，避免了访问冲突    
-其实上述fencing机制并不能完全解决客户端阻塞问题，因为GC有可能发生在任何时刻。如果在check Token之后发生长时间的GC仍然有可能造成访问资源冲突    
+移步使用lua续时，有一个版本的概念
+ ```
+//先判断是否对应线程 是否持有锁，
+      //KEY[1] 是锁名称 ARGV[2]是唯一的标识 UUID:ThreadId
+  "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+      //如果持有锁，那么就重新设置过期时间为 30S
+      "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+      "return 1; " +
+  "end; " +
+  "return 0;",
+  ```
+
