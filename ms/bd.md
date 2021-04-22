@@ -12,3 +12,9 @@
 从一个内核态的fd1传到内核态的fd2
 
 #### 设置锁的超时时间超过了设置时间
+client1获取锁成功，同时获取一个Token 33   
+client1进入GC Pause，锁超时释放   
+client2获取锁成功，同时获取Token 34   
+client2访问公共资源，并将Token 34 写到资源上    
+client1从GC Pause恢复，访问公共资源，发现所携带的Token小于正在访问公共资源的Token，则访问失败，直接返回，避免了访问冲突    
+其实上述fencing机制并不能完全解决客户端阻塞问题，因为GC有可能发生在任何时刻。如果在check Token之后发生长时间的GC仍然有可能造成访问资源冲突    
