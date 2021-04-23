@@ -91,8 +91,8 @@ min.isr配置会导致发送失败
 #### retention
 旧节点下线，或者新节点上线会有问题，会同步partition的数据，根据retention设置的时间，如果数据很多会同步很长时间
 
-#### patition下面文件存储结构
-partiton中segment文件存储结构
+#### partiton中segment文件存储结构
+
 
 segment file组成：由2大部分组成，分别为index file和data file，此2个文件一一对应，成对出现，后缀”.index”和“.log”分别表示为segment索引文件、数据文件.
 
