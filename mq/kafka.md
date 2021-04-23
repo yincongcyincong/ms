@@ -81,9 +81,6 @@ unclean.leader.election.enable=true
 
 min.isr配置会导致发送失败
 
-策略1，可靠性有保证，但是可用性低，只有最后挂了leader活过来kafka才能恢复。   
-策略1，可靠性有保证，但是可用性低，只有最后挂了leader活过来kafka才能恢复。   
-
 #### kafka通过append 数据保证顺序写
 
 #### kafka拉数据
@@ -93,4 +90,13 @@ min.isr配置会导致发送失败
   
 #### retention
 旧节点下线，或者新节点上线会有问题
+
+#### patition下面文件存储结构
+partiton中segment文件存储结构
+
+segment file组成：由2大部分组成，分别为index file和data file，此2个文件一一对应，成对出现，后缀”.index”和“.log”分别表示为segment索引文件、数据文件.
+
+segment文件命名规则：partion全局的第一个segment从0开始，后续每个segment文件名为上一个segment文件最后一条消息的offset值。数值最大为64位long大小，19位数字字符长度，没有数字用0填充。
+下面文件列表是笔者在Kafka broker上做的一个实验，创建一个topicXXX包含1 partition，设置每个segment大小为500MB,并启动producer向Kafka broker写入大量数据
+index是稀疏索引，log是真正的存储文件
 
