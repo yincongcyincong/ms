@@ -108,6 +108,9 @@ func (tb *Bucket) take(now time.Time, count int64, maxWait time.Duration) (time.
 	return waitTime, true
 }
 ```
+#### 基于Redis的分布式令牌桶限流器
+
+
 #### jaeger介绍
 
 #### opencensus是google服务追踪和监控的框架
