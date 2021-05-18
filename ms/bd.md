@@ -55,7 +55,34 @@ Go1.14 实现了基于信号的真抢占式调度解决了上述问题。Go1.14�
 每个goroutine保存自己的堆栈信息，panic是从g的defer里面找recover，需要遍历所有协程，或者维护调用关系
 
 #### 多服务调用超时
+```
+func requestWork(ctx context.Context, job interface{}) error {
+    ctx, cancel := context.WithTimeout(ctx, time.Second*2)
+    defer cancel()
 
+    done := make(chan error, 1)
+    panicChan := make(chan interface{}, 1)
+    go func() {
+        defer func() {
+            if p := recover(); p != nil {
+                panicChan <- p
+            }
+        }()
+
+        done <- hardWork(job)
+    }()
+
+    select {
+    case err := <-done:
+        return err
+    case p := <-panicChan:
+        panic(p)
+    case <-ctx.Done():
+        return ctx.Err()
+    }
+}
+```
+分成两个不同的部分，操作数据库在select下面，业务处理在另一个goroutine里面，处理完看时间是否超时
 
 #### mpg没有g
 内核线程调度不是用户态控制，并且可能因为系统调用阻塞
