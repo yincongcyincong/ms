@@ -52,6 +52,6 @@ func main() {
 Go1.14 实现了基于信号的真抢占式调度解决了上述问题。Go1.14程序启动时，在 runtime.sighandler 函数中注册了 SIGURG 信号的处理函数 runtime.doSigPreempt，在触发垃圾回收的栈扫描时，调用函数挂起goroutine，并向M发送信号，M收到信号后，会让当前goroutine陷入休眠继续执行其他的goroutine。   
 
 #### 为什么不能跨goroutine的recover
-
+每个goroutine保存自己的堆栈信息
 
 #### 多服务调用超时
