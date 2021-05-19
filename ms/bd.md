@@ -49,7 +49,15 @@ func main() {
 
 其中创建一个goroutine并挂起， main goroutine 优先调用了 休眠，此时唯一的 P 会转去执行 for 循环所创建的 goroutine，进而 main goroutine 永远不会再被调度。换一句话说在Go1.14之前，上边的代码永远不会输出OK，因为这种协作式的抢占式调度是不会使一个没有主动放弃执行权、且不参与任何函数调用的goroutine被抢占。    
 
-Go1.14 实现了基于信号的真抢占式调度解决了上述问题。Go1.14程序启动时，在 runtime.sighandler 函数中注册了 SIGURG 信号的处理函数 runtime.doSigPreempt，在触发垃圾回收的栈扫描时，调用函数挂起goroutine，并向M发送信号，M收到信号后，会让当前goroutine陷入休眠继续执行其他的goroutine。   
+Go1.14 实现了基于信号的真抢占式调度解决了上述问题。Go1.14程序启动时，在 runtime.sighandler 函数中注册了 SIGURG 信号的处理函数 runtime.doSigPreempt，在触发垃圾回收的栈扫描时，调用函数挂起goroutine，并向M发送信号，M收到信号后，会让当前goroutine陷入休眠继续执行其他的goroutine。  
+
+同步协作式调度		
+1.主动用户让权：通过 runtime.Gosched 调用主动让出执行机会；			
+2.主动调度弃权：当发生执行栈分段时，检查自身的抢占标记，决定是否继续执行；		
+异步抢占式调度
+1.被动监控抢占：当 G 阻塞在 M 上时（系统调用、channel 等），系统监控会将 P 从 M 上抢夺并分配给其他的 M 来执行其他的 G，而位于被抢夺 P 的 M 本地调度队列中 的 G 则可能会被偷取到其他 M 中。		
+2.被动 GC 抢占：当需要进行垃圾回收时，为了保证不具备主动抢占处理的函数执行时间过长，导致垃圾回收迟迟不得执行而导致的高延迟，而强制停止 G 并转为执行垃圾回收。		
+
 
 #### 为什么不能跨goroutine的recover
 每个goroutine保存自己的堆栈信息，panic是从g的defer里面找recover，需要遍历所有协程，或者维护调用关系，根据gmp模型，通过go关键字创建的goroutine都是top level的
@@ -83,6 +91,7 @@ func requestWork(ctx context.Context, job interface{}) error {
 }
 ```
 分成两个不同的部分，操作数据库在select下面，业务处理在另一个goroutine里面，处理完看时间是否超时
+
 
 #### mpg没有g
 内核线程调度不是用户态控制，并且可能因为系统调用阻塞
