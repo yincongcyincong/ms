@@ -12,3 +12,4 @@ Golang的GC过程有两次STW:
 第一次STW会准备根对象的扫描, 启动写屏障(Write Barrier)和辅助GC(mutator assist).     
 第二次STW会重新扫描部分根对象, 禁用写屏障(Write Barrier)和辅助GC(mutator assist).        
 
+内存对象会先在栈上然后逃逸到堆上
