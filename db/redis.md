@@ -148,7 +148,7 @@ struct sdshdr {
 #### rdb复制数据完整性
 子进程一开始和父进程共享内存数据，并且kernel把所有的页设置成只读，当有写发生时会触发页中断异常，kernel会把出错的页复制一份给子进程，达到复制效果
 
-#### redis set和 sort set
-set和sort set存储都是hashtable存储，sort set还是跳表，set是无序的
+#### sort set
+ sort set用字典和跳表
 
 
