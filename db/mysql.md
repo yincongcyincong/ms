@@ -176,10 +176,15 @@ Innodb的mvcc多版本并发控制用undolog控制，比如说你读取了一条
 Undo Log(回滚日志)用来实现事务的原子性(回滚)和隔离性(MVCC)。
 Undo Log和Redo Log正好相反，记录的是数据被修改前的信息，并且只记录逻辑变化，基于Undo Log进行的回滚只是对数据库进行一个相反的操作，而不是直接恢复物理页。
 
-#### innodb中select * from xxx = 123 for update 锁的实现， xxx有没有索引
+#### innodb中select * from xxx = 123 for update 锁的实现， 
+xxx有没有索引：
 rc是先锁所有行，然后释放掉不符合的行锁    
 rr先锁所有行，不释放   
 innodb的锁都是next key lock，不同情况退化成行锁或者gap lock   
+
+xxx是主键，锁所有主键
+
+xxx是其他索引，锁xxx，然后锁主键
 
 原则1：加锁的基本单位是next-key lock。next-key lock是前开后闭区间。   
 
