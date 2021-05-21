@@ -151,4 +151,9 @@ struct sdshdr {
 #### sort set
  sort set用字典和跳表
 
-
+#### aof
+服务器在执行完一个写命令之后，会以协议格式将被执行的写命令追加到服务器状态的aof_bug缓冲区的末尾。    
+服务器通过不停的时间循环来调用flushAppendOnlyFile函数处理aof_buf缓冲区中内容的写入。   
+# appendfsync always 每次都从buffer写入
+appendfsync everysec 1s写一次
+# appendfsync no     缓冲区满了写入
