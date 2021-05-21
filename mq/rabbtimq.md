@@ -22,8 +22,8 @@ Channel（信道）：消息推送使用的通道；
 
 Exchange（交换器）：用于接受、分配消息；  
   fanout 广播  
-  direct 发送到绑定队列的其中一个  
-  topic根据队列名匹配  
+  direct 发送到绑定队列的其中一个， 它会把消息路由到那些Binding key与Routing key完全匹配的Queue中。  
+  topic根据队列名匹配，模糊匹配Binding key与Routing key
 
 Queue（队列）：用于存储生产者的消息；  
 
@@ -31,7 +31,7 @@ RoutingKey（路由键）：用于把生成者的数据分配到交换器上；
 
 BindingKey（绑定键）：用于把交换器的消息绑定到队列上；  
 
-#### ack
+
 
 #### 元数据
 1.队列元数据：队列名称和它们的属性（是否可持久化，是否自动删除）   
@@ -60,6 +60,8 @@ Rabbit会将你的持久化消息写入磁盘上的持久化日志文件，等�
 #### 镜像队列：消息和元数据所有节点都有
 
 #### 和kafka一样先记日志，等内存缓冲区满了就落盘，所有节点数据都落磁盘
+
+#### 多个consumer消费同一条队列，每个consumer消费到一条消息
 
 #### ack
 有ack，没有offset， publisher和consumer都有ack
