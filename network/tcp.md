@@ -39,3 +39,8 @@ TCP是面向流的, 流, 要说明就像河水一样, 只要有水, 就会�
 
 #### close wait状态
 被断开连接放，主动发fin包没有发，因为忙于读和写
+
+#### tcp异常断开
+客户端程序崩溃或异常退出：服务端read时会报connection rest by peer。   
+断电重启：服务端发送心跳信息时，会收到客户端的RST消息，调用read时会报connection rest by peer。    
+断电或网络中断：服务端发送心跳信息后超时。   
