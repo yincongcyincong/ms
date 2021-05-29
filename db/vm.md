@@ -212,4 +212,4 @@ type blockHeader struct {
 3.自由的在固定时间片处理数据（比方说60个target，可以一秒一个target进行拉取）
 
 #### 查询过程
-通过index查找到tsid，tsid找到相关的table， partition， block，先找到头信息，进行信息比对，然后找到具体的series
+通过index查找到tsid，tsid找到相关的table， partition， block，先找到头信息，进行信息比对，然后找到具体的series， index是列存
