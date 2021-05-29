@@ -210,3 +210,6 @@ type blockHeader struct {
 1.开发更改时，可以在笔记本电脑上运行监视。
 2.您可以手动转到目标并使用web浏览器检查其运行状况。
 3.自由的在固定时间片处理数据（比方说60个target，可以一秒一个target进行拉取）
+
+#### 查询过程
+通过index查找到tsid，tsid找到相关的table， partition， block，先找到头信息，进行信息比对，然后找到具体的series
